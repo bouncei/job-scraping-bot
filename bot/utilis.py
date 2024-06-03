@@ -1,0 +1,22 @@
+job_sites = [
+    "https://www.linkedin.com/jobs/",
+    "https://www.indeed.com/",
+    "https://www.glassdoor.com/Job/index.htm",
+    "https://www.monster.com/jobs",
+    "https://www.simplyhired.com/",
+    "https://www.careerbuilder.com/",
+    "https://www.ziprecruiter.com/",
+    "https://www.dice.com/",
+    "https://angel.co/jobs",
+    "https://www.flexjobs.com/",
+    "https://remote.co/remote-jobs/",
+    "https://weworkremotely.com/",
+    "https://remoteok.io/",
+    "https://www.jobvite.com/jobs/",
+    "https://stackoverflow.com/jobs",
+    "https://jobs.github.com/",
+    "https://www.idealist.org/en/",
+    "https://www.themuse.com/jobs",
+    "https://www.usajobs.gov/",
+    "https://hired.com/"
+]
