@@ -11,6 +11,9 @@ load_dotenv()
 # Initialize Telegram Bot with API token from environment variable
 bot = telebot.TeleBot(os.getenv("TELEGRAM_BOT_TOKEN"))
 
+# Define the database URL
+db_url = os.getenv("DB_URL")
+
 # Register bot commands
 commands.register_commands(bot)
 
