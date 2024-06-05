@@ -25,4 +25,4 @@ commands.register_commands(bot)
 # Run the bot
 if __name__ == "__main__":
     print("Bot is polling...")
-    bot.polling(none_stop=True)
+    bot.polling()

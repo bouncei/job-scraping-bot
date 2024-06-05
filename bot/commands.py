@@ -1,5 +1,14 @@
 from .functions import auth, keyword
 
+def verify_text_input(bot, message):
+    if message.text and len(message.text) > 1: 
+        return True
+    
+    bot.reply_to(message, "Please enter a valid input (min: 2 characters):")
+    return False
+    
+   
+
 # Define bot commands
 def register_commands(bot):
     @bot.message_handler(commands=['start'])
@@ -75,74 +84,84 @@ def register_commands(bot):
 
     @bot.message_handler(commands=['addkeyword'])
     def handle_add_keyword(message):
-            chat_id = message.chat.id
-           
-            bot.reply_to(message, "Please enter a keyword:")
-            bot.register_next_step_handler(message, key_word_input, chat_id)
+        """
+        Adds a new keyword for a specific user
+        """
+        # TODO: A USER SHOULD BE ABLE TO ADD MULTIPLE KEYWORDS SEPERATED BY A COMMA
+        chat_id = message.chat.id
+        
+        bot.reply_to(message, "Please enter a keyword:")
+        bot.register_next_step_handler(message, key_word_input, chat_id)
        
 
     def key_word_input(message, user_id):
-        keyword_text = message.text
-        response = keyword.create_keyword(user_id, keyword_text)
+        """
+        Handles the keyword input
+        """
+        if verify_text_input(bot, message):
+            keyword_text = message.text
+            response = keyword.create_keyword(user_id, keyword_text)
 
-        bot.reply_to(message, response)
+            bot.reply_to(message, response)
+        else:
+            bot.register_next_step_handler(message, key_word_input, user_id)
+        
+ 
 
 
 
 
     @bot.message_handler(commands=['list_keywords'])
     def handle_list_keywords(message):
-        token = message.text.split(" ", 1)[1] if len(message.text.split(" ")) > 1 else None
-        if token:
-            user = get_user_by_token(token)
-            if user:
-                keywords = keyword.get_keywords(user.id)
-                if keywords:
-                    keywords_text = "\n".join([f"{keyword.id}: {keyword.keyword}" for keyword in keywords])
-                    bot.reply_to(message, f"Your keywords:\n{keywords_text}")
-                else:
-                    bot.reply_to(message, "You have no keywords.")
-            else:
-                bot.reply_to(message, "Invalid session token.")
+        """
+        Gets all of the keywords of a specific user
+        """
+        chat_id = message.chat.id
+        keywords = keyword.get_keywords(chat_id)
+        if keywords:
+            keywords_text = "\n".join([f"{keyword.id}: {keyword.keyword}" for keyword in keywords])
+            bot.reply_to(message, f"Your keywords:\n{keywords_text}")
         else:
-            bot.reply_to(message, "Please provide a session token.")
-
+            bot.reply_to(message, "You have no keywords.")
+        
+  
     @bot.message_handler(commands=['update_keyword'])
     def handle_update_keyword(message):
-        token = message.text.split(" ", 1)[1] if len(message.text.split(" ")) > 1 else None
-        if token:
-            user = get_user_by_token(token)
-            if user:
-                parts = message.text.split(" ", 3)
-                if len(parts) >= 4:
-                    keyword_id = parts[2]
-                    new_keyword_text = parts[3]
-                    if keyword.update_keyword(keyword_id, new_keyword_text):
-                        bot.reply_to(message, f"Keyword updated to '{new_keyword_text}'!")
-                    else:
-                        bot.reply_to(message, "Keyword not found.")
-                else:
-                    bot.reply_to(message, "Please provide keyword ID and new keyword text.")
-            else:
-                bot.reply_to(message, "Invalid session token.")
+        """
+        Handles updating/editing a specific keyword
+        """
+        # TODO: DISPLAY ALL KEYWORDS
+
+
+        old_keyword_text = message.text
+        
+        bot.reply_to(message, "Please enter a new keyword:")
+        bot.register_next_step_handler(message, update_new_keyword_input, old_keyword_text)
+
+    def update_new_keyword_input(message, old_keyword_text):
+        new_keyword_text = message.text
+        response = keyword.update_keyword(old_keyword_text, new_keyword_text)
+
+        if response:
+            bot.reply_to(message, response)
         else:
-            bot.reply_to(message, "Please provide a session token.")
+            bot.reply_to(message, "Keyword not found.")
+
+
+
 
     @bot.message_handler(commands=['delete_keyword'])
     def handle_delete_keyword(message):
-        token = message.text.split(" ", 1)[1] if len(message.text.split(" ")) > 1 else None
-        if token:
-            user = get_user_by_token(token)
-            if user:
-                keyword_id = message.text.split(" ", 2)[2] if len(message.text.split(" ")) > 2 else None
-                if keyword_id and keyword.delete_keyword(keyword_id):
-                    bot.reply_to(message, "Keyword deleted successfully!")
-                else:
-                    bot.reply_to(message, "Keyword not found.")
-            else:
-                bot.reply_to(message, "Invalid session token.")
+        """
+        Handles deleting a keyword
+        """
+        # TODO: THERE SHOULD BE A VERIFICATION STEP BEFORE PROCEEDING ("Are you sure you want to delete this keyword?")
+       
+        response =  keyword.delete_keyword(message.text)
+        if response :
+            bot.reply_to(message, "Keyword deleted successfully!")
         else:
-            bot.reply_to(message, "Please provide a session token.")
+            bot.reply_to(message, "Keyword not found.")
 
 
     

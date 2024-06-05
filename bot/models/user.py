@@ -9,9 +9,6 @@ class User(Base):
     username = Column(String, unique=True)
     password = Column(String)
 
-    # Define the relationship to the Job and Keyword models
-    # jobs = relationship('Job', back_populates='user')
-    # keywords = relationship('Keyword', back_populates='user')
 
 
     def __repr__(self):
