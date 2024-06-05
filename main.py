@@ -9,15 +9,20 @@ import bot.commands as commands
 load_dotenv()
 
 # Initialize Telegram Bot with API token from environment variable
-bot = telebot.TeleBot(os.getenv("TELEGRAM_BOT_TOKEN"))
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+if TELEGRAM_BOT_TOKEN is None:
+    raise ValueError("No TELEGRAM_BOT_TOKEN found in environment variables")
 
-# Define the database URL
-db_url = os.getenv("DB_URL")
+
+# Initialize Telegram Bot with API token from environment variable
+bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
+
+
 
 # Register bot commands
 commands.register_commands(bot)
 
 # Run the bot
 if __name__ == "__main__":
-    print("Bot running...")
-    bot.polling()
+    print("Bot is polling...")
+    bot.polling(none_stop=True)
