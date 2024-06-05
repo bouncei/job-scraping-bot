@@ -21,7 +21,7 @@ engine = create_engine(db_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Import models to create tables
-from .models.user import User
+# from .models.user import User
 from .models.job import Job
 from .models.keyword import Keyword
 # from .models.resume import Resume
