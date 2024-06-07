@@ -7,15 +7,16 @@ class Job(Base):
     __tablename__ = "jobs"
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(BigInteger)
+    user_id = Column(BigInteger,  nullable=False)
     # user = relationship('User', back_populates='jobs')
-    title = Column(String)
+    title = Column(String,  nullable=False)
     company = Column(String)
     location = Column(String)
     description = Column(Text)
-    source = Column(String)
-    posted_at = Column(DateTime)
+    status=Column(String, default="none") #Options: applied, declined
+    source = Column(String, unique=True,  nullable=False)
+    posted_at = Column(DateTime,  nullable=False)
 
 
     def __repr__(self):
-        return f"<Job(title='{self.title}', company='{self.company}', location='{self.location}')>"
+        return f"<Job(title='{self.title}', company='{self.company}', location='{self.location}, status='{self.status}')>"

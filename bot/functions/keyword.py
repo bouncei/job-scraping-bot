@@ -4,7 +4,7 @@ from . import db
 
 def create_keyword(user_id: str, keyword_text: str) -> str:
     if check_keyword(user_id, keyword_text):
-        return "Keyword already exists"
+        return f"Keyword '{keyword_text}' already exists"
 
     keyword = Keyword(user_id=user_id, keyword=keyword_text)
     db.add(keyword)
@@ -14,7 +14,7 @@ def create_keyword(user_id: str, keyword_text: str) -> str:
         return f"Keyword '{keyword_text}' added successfully"
     except IntegrityError:
         db.rollback()
-        return "Keyword already exists"
+        return f"Keyword '{keyword_text}' already exists"
     except SQLAlchemyError as e:
         db.rollback()
         print(f"SQLAlchemy error: {e}")
@@ -76,7 +76,7 @@ def update_keyword(old_keyword_text: str, new_keyword_text: str) -> str:
             return f"Keyword updated to '{new_keyword_text}'!"
         except IntegrityError:
             db.rollback()
-            return "Keyword already exists"
+            return f"Keyword '{new_keyword_text}' already exists"
         except SQLAlchemyError as e:
             db.rollback()
             print(f"SQLAlchemy error: {e}")

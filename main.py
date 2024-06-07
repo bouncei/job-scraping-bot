@@ -1,9 +1,11 @@
-# main.py
-
 import telebot
 from dotenv import load_dotenv
 import os
 import bot.commands as commands
+import logging
+
+logger = telebot.logger
+telebot.logger.setLevel(logging.DEBUG) # Outputs debug messages to console.
 
 # Load environment variables from .env file
 load_dotenv()
