@@ -20,7 +20,6 @@ if TELEGRAM_BOT_TOKEN is None:
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
 
 
-
 # Register bot commands
 commands.register_commands(bot)
 

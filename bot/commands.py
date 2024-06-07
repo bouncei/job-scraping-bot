@@ -1,4 +1,4 @@
-from .functions import auth, keyword
+from .functions import auth, keyword, group
 from telebot import types
 
 def verify_text_input(bot, message):
@@ -12,42 +12,51 @@ def register_commands(bot):
     @bot.message_handler(commands=['start'])
     def handle_start(message):
         start_text = """
-        Welcome to the Job Scraping Bot!\n
-        Select an option below:
+        Welcome to the Job Scraping Bot! \n Select an option below:
         """
         # TODO: WHEN THIS BUTTON IS INITIALIZED, THE COMMAND BUTTONS (Keywords, Jobs, Resume review)
         markup = types.ReplyKeyboardMarkup()
 
 
-        go_back = types.KeyboardButton("Go back")
-        startbtn1 = types.KeyboardButton('Keywords')
-        startbtn2 = types.KeyboardButton('Jobs')
-        startbtn3 = types.KeyboardButton('Resume review(coming soon...)')
-        startbtn4 = types.KeyboardButton("Help")
+        startbtn1 = types.KeyboardButton('🔑 Keywords')
+        startbtn2 = types.KeyboardButton('💼 Jobs')
+        startbtn3 = types.KeyboardButton('👥 Groups')
+        startbtn4 = types.KeyboardButton('📺 Channels')
+        startbtn5 = types.KeyboardButton('📝 Resume review(coming soon...)')
         
-        markup.row(go_back)
         markup.row(startbtn1, startbtn2)
         markup.row(startbtn3, startbtn4)
+        markup.row(startbtn5)
+
+
 
         # tb.send_message(chat_id, "Choose one letter:", reply_markup=markup)
         bot.reply_to(message, start_text, reply_markup=markup)
 
     
     # KEYWORD SECTION
-    @bot.message_handler(func=lambda message: message.text == "Keywords")
+    @bot.message_handler(func=lambda message: message.text == "🔑 Keywords")
     def handle_keywords(message):
-        markup = types.ReplyKeyboardMarkup(row_width=1)
-        btn1 = types.KeyboardButton('Add keyword')
-        btn2 = types.KeyboardButton('List keywords')
-        btn3 = types.KeyboardButton('Update keyword')
-        btn4 = types.KeyboardButton("Delete keyword")
-        markup.add(btn1, btn2, btn3, btn4)
-        bot.reply_to(message, "Select an option below:", reply_markup=markup)
+        markup = types.ReplyKeyboardMarkup()
 
-    @bot.message_handler(func=lambda message: message.text == "Add Keyword")
+        go_back = types.KeyboardButton("<< Go back") #TODO
+        btn1 = types.KeyboardButton('➕ Add keyword')
+        btn2 = types.KeyboardButton('👀 List keywords')
+        btn3 = types.KeyboardButton('🖋 Update keyword')
+        btn4 = types.KeyboardButton("🗑 Delete keyword")
+
+        markup.row(go_back)
+        markup.row(btn1, btn2)
+        markup.row(btn3, btn4)
+        bot.reply_to(message, "Manage keywords:", reply_markup=markup)
+
+    
+
+    @bot.message_handler(func=lambda message: message.text == "➕ Add keyword")
     def handle_add_keyword(message):
         chat_id = message.chat.id
-        bot.reply_to(message, "Please enter keywords separated by commas:")
+        markup = types.ReplyKeyboardRemove(selective=False)
+        bot.reply_to(message, "Please enter keywords separated by commas:", reply_markup=markup)
         bot.register_next_step_handler(message, keywords_input, chat_id)
 
     def keywords_input(message, user_id):
@@ -59,7 +68,7 @@ def register_commands(bot):
         else:
             bot.register_next_step_handler(message, keywords_input, user_id)
 
-    @bot.message_handler(func=lambda message: message.text == 'List keywords')
+    @bot.message_handler(func=lambda message: message.text == '👀 List keywords')
     def handle_list_keywords(message):
         chat_id = message.chat.id
         keywords = keyword.get_keywords(chat_id)
@@ -69,13 +78,14 @@ def register_commands(bot):
         else:
             bot.reply_to(message, "You have no keywords.")
 
-    @bot.message_handler(func=lambda message: message.text == 'Update keyword')
+    @bot.message_handler(func=lambda message: message.text == '🖋 Update keyword')
     def handle_update_keyword(message):
         chat_id = message.chat.id
         keywords = keyword.get_keywords(chat_id)
         if keywords:
             keywords_text = "\n".join([f"{keyword.id}: {keyword.keyword}" for keyword in keywords])
-            bot.reply_to(message, f"Your keywords:\n{keywords_text}\n\nEnter the keyword you want to update:")
+            markup = types.ReplyKeyboardRemove(selective=False)
+            bot.reply_to(message, f"Your keywords:\n{keywords_text}\n\nEnter the keyword you want to update:", reply_markup=markup)
             bot.register_next_step_handler(message, update_old_keyword_input)
         else:
             bot.reply_to(message, "You have no keywords to update.")
@@ -90,69 +100,103 @@ def register_commands(bot):
         response = keyword.update_keyword(old_keyword_text, new_keyword_text)
         bot.reply_to(message, response if response else "Keyword not found.")
 
-    @bot.message_handler(func=lambda message: message.text == 'Delete keyword')
+    @bot.message_handler(func=lambda message: message.text == '🗑 Delete keyword')
     def handle_delete_keyword(message):
         chat_id = message.chat.id
         keywords = keyword.get_keywords(chat_id)
         if keywords:
             keywords_text = "\n".join([f"{keyword.id}: {keyword.keyword}" for keyword in keywords])
-            bot.reply_to(message, f"Your keywords:\n{keywords_text}\n\nEnter the keyword ID you want to delete:")
+            markup = types.ReplyKeyboardRemove(selective=False)
+
+            bot.reply_to(message, f"Your keywords:\n{keywords_text}\n\nEnter the keyword ID you want to delete:", reply_markup=markup)
             bot.register_next_step_handler(message, delete_keyword_confirmation)
         else:
             bot.reply_to(message, "You have no keywords to delete.")
 
     def delete_keyword_confirmation(message):
         keyword_id = message.text
-        bot.reply_to(message, f"Are you sure you want to delete keyword ID {keyword_id}? (yes/no)")
+        markup = types.ReplyKeyboardMarkup(row_width=2)
+        btn1 = types.KeyboardButton('Yes')
+        btn2 = types.KeyboardButton('No')
+
+
+        markup.add(btn1, btn2)
+        bot.reply_to(message, f"Are you sure you want to delete keyword ID {keyword_id}?", reply_markup=markup)
         bot.register_next_step_handler(message, delete_keyword, keyword_id)
 
     def delete_keyword(message, keyword_id):
+        markup = types.ReplyKeyboardRemove(selective=False)
+
         if message.text.lower() == 'yes':
             response = keyword.delete_keyword(keyword_id)
-            bot.reply_to(message, "Keyword deleted successfully!" if response else "Keyword not found.")
+            bot.reply_to(message, f"Keyword deleted successfully!" if response else "Keyword not found.", reply_markup=markup)
         else:
-            bot.reply_to(message, "Keyword deletion canceled.")
+            bot.reply_to(message, "Keyword deletion canceled.", reply_markup=markup)
 
     # JOBS SECTION
-    @bot.message_handler(func=lambda message: message.text == "Jobs")
+    @bot.message_handler(func=lambda message: message.text == "💼 Jobs")
     def handle_jobs(message):
-        markup = types.ReplyKeyboardMarkup(row_width=1)
+        markup = types.ReplyKeyboardMarkup()
+        go_back = types.KeyboardButton("<< Go back") 
         # btn1 = types.KeyboardButton('Search jobs')
-        btn2 = types.KeyboardButton('Saved jobs')
-        btn3 = types.KeyboardButton('Applied jobs')
-        markup.add(btn2, btn3)
+        btn2 = types.KeyboardButton('🎒 Saved jobs')
+        btn3 = types.KeyboardButton('📝 Applied jobs')
+
+        markup.row(go_back)
+        markup.row(btn2, btn3)
         bot.reply_to(message, "Manage jobs:", reply_markup=markup)
+    
+    
+
+    # GROUPS SECTION
+    @bot.message_handler(func=lambda message: message.text == "👥 Groups")
+    def handle_groups(message):
+        markup = types.ReplyKeyboardMarkup()
+        go_back = types.KeyboardButton("<< Go back") 
+        btn1 = types.KeyboardButton('➕ Add group')
+        btn2 = types.KeyboardButton('👀 List groups')
+        btn3 = types.KeyboardButton('🖋 Update group')
+        btn4 = types.KeyboardButton("🗑 Delete group")
+        markup.row(go_back)
+        markup.row(btn1, btn2)
+        markup.row(btn3, btn4)  
+        bot.reply_to(message, "Manage groups:", reply_markup=markup)
+
+    @bot.message_handler(func=lambda message: message.text == "➕ Add group")
+    def handle_add_group(message):
+        markup = types.ReplyKeyboardRemove(selective=False)
+        bot.reply_to(message, "Please enter the group ID:", reply_markup=markup)
+        bot.register_next_step_handler(message, save_group_id)
+
+    def save_group_id(message):
+        pass
+
+
+
+    # CHANNELS SECTION
+    @bot.message_handler(func=lambda message: message.text == "📺 Channels")
+    def handle_channels(message):
+        markup = types.ReplyKeyboardMarkup()
+        go_back = types.KeyboardButton("<< Go back") 
+        btn1 = types.KeyboardButton('➕ Add channel')
+        btn2 = types.KeyboardButton('👀 List channels')
+        btn3 = types.KeyboardButton('🖋 Update channel')
+        btn4 = types.KeyboardButton("🗑 Delete channel")
+        markup.row(go_back)
+        markup.row(btn1, btn2)
+        markup.row(btn3, btn4)  
+        bot.reply_to(message, "Manage channels:", reply_markup=markup)
 
 
     # RESUME REVIEW SECTION
-    @bot.message_handler(func=lambda message: message.text == "Resume review (coming soon...)")
+    @bot.message_handler(func=lambda message: message.text == "📝 Resume review(coming soon...)")
     def handle_resume_review(message):
         bot.reply_to(message, "Resume review is coming soon! Stay tuned for updates.")
 
-    # HELP SECTION
-    @bot.message_handler(func=lambda message: message.text == "Help")
-    def handle_help(message):
-        help_text = """
-        Available commands:
-        /help - Show available commands
-        /addkeyword - Set or update keywords for job filtering
-        /searchjobs - Manually search for jobs using the set keywords
-        /applyall - Automatically apply to all jobs that match the set keywords
-        /savedjobs - View the list of saved jobs for later review or application
-        /appliedjobs - View the list of jobs the user has applied to
-        /listsources - View the current list of job sources (websites, Telegram channels, groups)
-        /addsource - Add a new job source (website, Telegram channel, group)
-        /removesource - Remove an existing job source from the list
-        /setnotifications - Set preferences for job notifications (e.g., frequency, types of jobs)
-        /analyzemyresume - Submit a resume for AI analysis and keyword suggestions
-        /subscribe - Subscribe to the bot’s services after the free trial
-        /status - Check the current subscription status
-        /cancel - Cancel the current subscription
-
-        For assistance, contact support or visit our website.
-        """
-        bot.reply_to(message, help_text)
-
+    # GO BACK FUNCTION
+    @bot.message_handler(func=lambda message: message.text == "<< Go back")
+    def handle_go_back(message):
+        handle_start(message)
 
     # INVALID PROMPT
     @bot.message_handler(func=lambda m: True)

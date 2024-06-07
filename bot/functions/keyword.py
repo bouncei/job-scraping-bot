@@ -65,7 +65,7 @@ def check_keyword(user_id: str, keyword_text: str):
         return False
 
 def update_keyword(old_keyword_text: str, new_keyword_text: str) -> str:
-    keyword = get_keyword_by_name(old_keyword_text)
+    keyword = get_keyword_by_id(old_keyword_text)
     if keyword:
         if check_keyword(keyword.user_id, new_keyword_text):
             return f"Keyword '{new_keyword_text}' already exists, try again."
