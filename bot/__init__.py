@@ -24,6 +24,9 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 # from .models.user import User
 from .models.job import Job
 from .models.keyword import Keyword
+from .models.channel import Channel
+from .models.group import Group
+from .models.website import Website
 # from .models.resume import Resume
 
 # Create the database tables
