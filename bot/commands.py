@@ -254,9 +254,30 @@ def register_commands(bot):
             markup = types.ReplyKeyboardRemove(selective=False)
 
             bot.reply_to(message, f"Your channels:\n{channels_id}\n\nEnter the Channel ID you want to delete:", reply_markup=markup)
-            bot.register_next_step_handler(message, delete_keyword_confirmation)
+            bot.register_next_step_handler(message, delete_channel_confirmation)
         else:
             bot.reply_to(message, "You have no channels to delete.")
+
+    def delete_channel_confirmation(message):
+        id = message.text
+        markup = types.ReplyKeyboardMarkup(row_width=2)
+        btn1 = types.KeyboardButton('Yes')
+        btn2 = types.KeyboardButton('No')
+
+
+        markup.add(btn1, btn2)
+        bot.reply_to(message, f"Are you sure you want to delete channel ID - {id}?", reply_markup=markup)
+        bot.register_next_step_handler(message, delete_channel, id)
+
+    def delete_channel(message, id):
+        markup = types.ReplyKeyboardRemove(selective=False)
+
+        if message.text.lower() == 'yes':
+            response = channel.delete_channel(id)
+            bot.reply_to(message, f"Channel deleted successfully!" if response else "Channel not found.", reply_markup=markup)
+        else:
+            bot.reply_to(message, "Channel deletion canceled.", reply_markup=markup)
+
 
     
 
