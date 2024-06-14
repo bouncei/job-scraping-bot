@@ -191,6 +191,7 @@ def register_commands(bot):
     @bot.message_handler(func=lambda message: message.text == '➕ Add channel')
     def handle_add_channel(message):
         user_id = message.chat.id
+        print("user id", message)
         markup = types.ReplyKeyboardRemove(selective=False)
         bot.reply_to(message, "Please enter channel username/ID:", reply_markup=markup)
         bot.register_next_step_handler(message, channels_input, user_id)
