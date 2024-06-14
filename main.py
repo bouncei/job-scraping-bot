@@ -26,7 +26,7 @@ keywords = keyword.get_keywords(USER_ID)
 KEYWORDS_TEXT = [keyword.keyword for keyword in keywords]
 CHANNEL_IDS = [channel.channel_id for channel in channels]
 
-
+ 
 # Initialize Telethon client
 client = TelegramClient('monitor_bot', API_ID, API_HASH)
 
